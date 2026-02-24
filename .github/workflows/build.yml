@@ -1,1 +1,26 @@
+name: Build APK
+on: [push]
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          pip install --user buildozer cython
+      - name: Build with buildozer
+        run: |
+          buildozer init
+          sed -i 's/requirements = python3/requirements = python3,pygame/' buildozer.spec
+          sed -i 's/source.include_exts = py/source.include_exts = py,png,jpg,jpeg,gif,mp3,wav,ttf/' buildozer.spec
+          buildozer -v android debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-game-apk
+          path: bin/*.apk
